@@ -22,7 +22,7 @@ export default function DashboardLayout() {
         />
       </section>
 
-      <section className="min-h-0 overflow-hidden border-l border-slate-200 bg-white p-4">
+      <section className="min-h-0 overflow-hidden border-l border-[var(--border-subtle)] bg-[var(--bg-panel)] p-4">
         <EmailFilesModal
           key={selectedEmailId || 'empty'}
           emailId={selectedEmailId}

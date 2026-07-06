@@ -24,17 +24,17 @@ export default function EmailCard({ email, isSelected, onSelect }) {
             type="button"
             className={`w-full h-auto min-h-fit overflow-visible rounded-lg border p-4 text-left transition ${
                 isSelected
-                    ? 'border-[var(--primary)] bg-blue-50 shadow-sm'
-                    : 'border-slate-300 bg-white hover:border-[var(--primary)] hover:shadow-sm'
+                    ? 'border-[var(--accent)] bg-[var(--bg-primary)] shadow-sm'
+                    : 'border-[var(--border-strong)] bg-[var(--bg-panel)] hover:border-[var(--accent)] hover:shadow-sm'
             }`}
             onClick={handleClick}
         >
-            <div className="text-xs font-medium text-slate-500">{formatDateTime(email.arrival_at)}</div>
+            <div className="text-xs font-medium text-[var(--text-secondary)]">{formatDateTime(email.arrival_at)}</div>
             <div className="mt-2 flex flex-col gap-2">
-                <h2 className="break-words text-sm font-semibold text-slate-950">{email.arrival_email}</h2>
-                <h3 className="break-words text-sm font-medium text-slate-700">{email.subject}</h3>
-                <p className="break-words whitespace-pre-wrap text-sm text-slate-500">{email.body}</p>
-                <span className="inline-flex w-fit rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+                <h2 className="break-words text-sm font-semibold text-[var(--text-primary)]">{email.arrival_email}</h2>
+                <h3 className="break-words text-sm font-medium text-[var(--text-secondary)]">{email.subject}</h3>
+                <p className="break-words whitespace-pre-wrap text-sm text-[var(--text-secondary)]">{email.body}</p>
+                <span className="inline-flex w-fit rounded-md bg-[var(--bg-input)] px-2 py-1 text-xs font-medium text-[var(--text-secondary)]">
                     {email.status}
                 </span>
             </div>

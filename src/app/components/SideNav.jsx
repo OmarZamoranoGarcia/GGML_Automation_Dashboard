@@ -8,15 +8,15 @@ const links = [
 
 export default function SideNav() {
   return (
-    <nav className="flex h-full w-56 flex-col justify-between border-r border-slate-200 bg-[var(--background)] p-6 shadow-sm">
+    <nav className="flex h-full w-56 flex-col justify-between border-r border-[var(--border-subtle)] bg-[var(--bg-primary)] p-6 shadow-sm">
       <div>
         <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--primary)] text-sm font-semibold text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent)] text-sm font-semibold text-[var(--bg-primary)]">
             G
           </div>
           <div>
-            <p className="text-sm font-semibold text-[var(--foreground)]">GGML</p>
-            <p className="text-xs text-[var(--secondary)]">Automation Dashboard</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)]">GGML</p>
+            <p className="text-xs text-[var(--text-secondary)]">Automation Dashboard</p>
           </div>
         </div>
 
@@ -24,20 +24,20 @@ export default function SideNav() {
           {links.map((link) => (
             <li key={link.name}>
               <button
-                className={`flex w-full items-center rounded-lg px-3 py-2 text-sm font-medium gap-2 transition ${
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
                   link.active
-                    ? 'bg-[var(--primary)] text-white shadow-sm'
-                    : 'text-[var(--secondary)] hover:bg-slate-100 hover:text-[var(--foreground)]'
+                    ? 'bg-[var(--accent)] text-[var(--bg-primary)] shadow-sm'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-panel)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                <InboxIcon/> {link.name}
+                <InboxIcon /> {link.name}
               </button>
             </li>
           ))}
         </ul>
       </div>
 
-      <button className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-[var(--secondary)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]">
+      <button className="rounded-lg border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]">
         Sign Out
       </button>
     </nav>
