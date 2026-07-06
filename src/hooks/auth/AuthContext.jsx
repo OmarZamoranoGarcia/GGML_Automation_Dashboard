@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { apiFetch } from "@/app/(auth)/auth.api";
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
+import { apiFetch, logout as logoutRequest } from "@/app/(auth)/auth.api";
 
 const AuthContext = createContext(null);
 
@@ -46,9 +46,17 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  const logout = useCallback(async () => {
+    try {
+      await logoutRequest();
+    } finally {
+      setUser(null);
+    }
+  }, []);
+
   const value = useMemo(
-    () => ({ user, setUser, loading }),
-    [user, loading],
+    () => ({ user, setUser, loading, logout }),
+    [user, loading, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

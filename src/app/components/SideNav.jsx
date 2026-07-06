@@ -1,12 +1,29 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import InboxIcon from '@mui/icons-material/Inbox';
+import { useAuth } from '@/hooks/auth';
 
 const links = [
   { name: 'Inbox', active: true }
 ];
 
 export default function SideNav() {
+  const router = useRouter();
+  const { logout } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await logout();
+    } finally {
+      router.replace('/login');
+      router.refresh();
+    }
+  };
+
   return (
     <nav className="flex h-full w-56 flex-col justify-between border-r border-[var(--border-subtle)] bg-[var(--bg-primary)] p-6 shadow-sm">
       <div>
@@ -37,8 +54,13 @@ export default function SideNav() {
         </ul>
       </div>
 
-      <button className="rounded-lg border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]">
-        Sign Out
+      <button
+        type="button"
+        onClick={handleSignOut}
+        disabled={signingOut}
+        className="rounded-lg border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-60"
+      >
+        {signingOut ? 'Cerrando sesión...' : 'Sign Out'}
       </button>
     </nav>
   );

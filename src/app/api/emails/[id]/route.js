@@ -1,7 +1,8 @@
 import { getSupabaseAdminClient } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { requireRole } from '@/lib/auth-guard';
 
-const EMAIL_FILES_BUCKET = process.env.EMAIL_FILES_BUCKET;;
+const EMAIL_FILES_BUCKET = process.env.EMAIL_FILES_BUCKET;
 const SIGNED_URL_EXPIRES_IN_SECONDS = 60 * 60;
 
 function getStoragePath(path) {
@@ -14,10 +15,12 @@ function getStoragePath(path) {
 
 export async function GET(request, { params }) {
   try {
+    const auth = requireRole(request, '/dashboard');
+    if (!auth.authorized) return auth.response;
+
     const { id } = await params;
     const supabase = getSupabaseAdminClient();
 
-    // Verificar autenticación
     if (!supabase) {
       return NextResponse.json(
         { ok: false, error: 'Supabase admin client is not configured.' },
@@ -40,7 +43,7 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Generar URLs públicas para cada archivo
+    // Generar URLs firmadas para cada archivo
     const filesWithUrls = await Promise.all(
       (files ?? []).map(async (file) => {
         const storagePath = getStoragePath(file.storage_path);

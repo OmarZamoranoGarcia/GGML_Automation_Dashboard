@@ -16,3 +16,18 @@ export async function findByEmail(email) {
 
     return data;
 }
+
+export async function findById(id) {
+
+    const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (error) {
+        return null;
+    }
+
+    return data;
+}

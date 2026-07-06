@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { verifyRefreshToken, generateAccessToken } from "@/app/(auth)/jwt";
+import { setAccessCookie } from "@/app/(auth)/cookies";
+import { findById } from "@/app/(auth)/auth.repository";
 
 export async function POST(request) {
 
     const refreshToken = request.cookies.get("refresh_token")?.value;
 
-    // NO HAY REFRESH TOKEN
     if (!refreshToken) {
         return NextResponse.json(
             { message: "No refresh token" },
@@ -15,42 +16,35 @@ export async function POST(request) {
 
     try {
 
-        // VERIFICAR REFRESH TOKEN
-        const decoded = jwt.verify(
-            refreshToken,
-            process.env.JWT_SECRET
-        );
+        // El refresh token solo lleva "sub" (id de usuario) por diseño: no
+        // conviene incrustar el rol en un token de vida larga, porque si el
+        // rol del usuario cambia en la base de datos, el token viejo seguiría
+        // teniendo el rol anterior hasta expirar. Por eso, en cada refresh
+        // volvemos a leer el usuario actual desde la base de datos.
+        const decoded = verifyRefreshToken(refreshToken);
 
-        // GENERAR NUEVO ACCESS TOKEN
-        const newAccessToken = jwt.sign(
-            {
-                sub: decoded.sub,
-                email: decoded.email,
-                role: decoded.role
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: "15m" }
-        );
+        const user = await findById(decoded.sub);
 
-        // RESPUESTA CON COOKIE NUEVA  
+        if (!user) {
+            return NextResponse.json(
+                { message: "Usuario no encontrado" },
+                { status: 401 }
+            );
+        }
+
+        const newAccessToken = generateAccessToken(user);
+
         const response = NextResponse.json(
             { message: "Token renovado" },
             { status: 200 }
         );
 
-        response.cookies.set("access_token", newAccessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 60 * 15 // 15 min
-        });
+        setAccessCookie(response, newAccessToken);
 
         return response;
 
     } catch (error) {
 
-        // REFRESH TOKEN INVÁLIDO / EXPIRADO  
         return NextResponse.json(
             { message: "Refresh token inválido" },
             { status: 401 }

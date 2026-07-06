@@ -17,6 +17,18 @@ export async function login(credentials) {
     return data;
 }
 
+export async function logout() {
+    const response = await apiFetch("/api/auth/logout", {
+        method: "POST"
+    });
+
+    if (!response.ok) {
+        throw new Error("No se pudo cerrar sesión.");
+    }
+
+    return response.json();
+}
+
 export async function apiFetch(url, options = {}) {
     let response = await fetch(url, {
         ...options,

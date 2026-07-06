@@ -1,16 +1,8 @@
 import { NextResponse } from "next/server";
 import { validateLogin } from "@/app/(auth)/validators/login.validator";
 import { login } from "@/app/(auth)/auth.service";
-
-function getRedirectPath(role) {
-  const normalizedRole = String(role || "").toLowerCase();
-
-  if (normalizedRole === "admin") {
-    return "/dashboard";
-  }
-
-  return "/";
-}
+import { setAuthCookies } from "@/app/(auth)/cookies";
+import { getRedirectPath } from "@/lib/route-permissions";
 
 export async function POST(request) {
   try {
@@ -43,21 +35,7 @@ export async function POST(request) {
       },
     });
 
-    response.cookies.set("access_token", result.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 15,
-    });
-
-    response.cookies.set("refresh_token", result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    });
+    setAuthCookies(response, result.accessToken, result.refreshToken);
 
     return response;
   } catch (error) {

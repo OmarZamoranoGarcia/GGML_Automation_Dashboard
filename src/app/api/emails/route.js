@@ -1,9 +1,13 @@
 import { getSupabaseAdminClient } from '@/lib/supabase';
+import { requireRole } from '@/lib/auth-guard';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request) {
+  const auth = requireRole(request, '/dashboard');
+  if (!auth.authorized) return auth.response;
+
   const supabase = getSupabaseAdminClient();
 
   if (!supabase) {

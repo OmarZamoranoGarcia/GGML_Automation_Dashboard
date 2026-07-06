@@ -1,38 +1,19 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
+import { hasAccess, getRedirectPath } from "@/lib/route-permissions";
 
-/**
- * ===============================
- * CONFIGURACIÓN DE RUTAS Y ROLES
- * Formato: "ruta": ["rol1", "rol2"]
- */
+const encodedSecret = new TextEncoder().encode(process.env.JWT_SECRET);
 
-const ROUTE_PERMISSIONS = {
-  "/dashboard": ["admin"],
-  "/example": ["user"],
-};
-
-function normalizeRole(role) {
-  return String(role || "").toLowerCase();
+// jsonwebtoken depende del módulo "crypto" de Node y NO funciona en el
+// Edge Runtime donde corre el middleware. `jose` usa Web Crypto API,
+// compatible con Edge. Las API routes (Node runtime) siguen usando
+// jsonwebtoken en src/app/(auth)/jwt.js sin problema.
+async function getUserFromToken(token) {
+  const { payload } = await jwtVerify(token, encodedSecret);
+  return payload;
 }
 
-function hasAccess(path, role) {
-  const allowedRoles = ROUTE_PERMISSIONS[path];
-
-  if (!allowedRoles) return true;
-
-  return allowedRoles.includes(normalizeRole(role));
-}
-
-function getUserFromToken(token) {
-  return jwt.verify(token, process.env.JWT_SECRET);
-}
-
-function getRedirectPath(role) {
-  return normalizeRole(role) === "admin" ? "/dashboard" : "/";
-}
-
-export function middleware(request) {
+export async function middleware(request) {
   const token = request.cookies.get("access_token")?.value;
   const { pathname } = request.nextUrl;
 
@@ -49,7 +30,7 @@ export function middleware(request) {
   if (PUBLIC_ROUTES.includes(pathname)) {
     if (token) {
       try {
-        const decoded = getUserFromToken(token);
+        const decoded = await getUserFromToken(token);
         return NextResponse.redirect(new URL(getRedirectPath(decoded.role), request.url));
       } catch {
         return NextResponse.next();
@@ -64,15 +45,14 @@ export function middleware(request) {
   }
 
   try {
-    const decoded = getUserFromToken(token);
-    const role = decoded.role;
+    const decoded = await getUserFromToken(token);
 
-    if (!hasAccess(pathname, role)) {
+    if (!hasAccess(pathname, decoded.role)) {
       return NextResponse.redirect(new URL("/403", request.url));
     }
 
     return NextResponse.next();
-  } catch (error) {
+  } catch {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 }

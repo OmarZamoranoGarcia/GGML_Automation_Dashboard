@@ -1,32 +1,38 @@
+/**
+ * Utilidad de desarrollo para generar el hash bcrypt de una contraseña,
+ * útil al crear usuarios manualmente en la base de datos.
+ *
+ * Uso:
+ *   node scripts/hash-password.js "miContraseñaSegura"
+ */
 import bcrypt from "bcryptjs";
 
-const password = ""; //Ingresar contraseña a hashear
-
+const password = process.argv[2];
 const SALT_ROUNDS = 12;
+
+if (!password) {
+    console.error("Uso: node scripts/hash-password.js \"<contraseña>\"");
+    process.exit(1);
+}
 
 async function generateHash() {
     try {
         const hash = await bcrypt.hash(password, SALT_ROUNDS);
 
         console.log("\n==============================");
-        console.log("Contraseña:");
-        console.log(password);
-        console.log("\nHash:");
+        console.log("Hash generado:");
         console.log(hash);
-        verifyHash(hash);
+        await verifyHash(hash);
         console.log("==============================\n");
     } catch (error) {
         console.error(error);
+        process.exit(1);
     }
 }
 
 async function verifyHash(hash) {
-    try {
-        const isMatch = await bcrypt.compare(password, hash);
-        console.log("La contraseña es válida:", isMatch);
-    }catch (error) {
-        console.error(error);
-    }
+    const isMatch = await bcrypt.compare(password, hash);
+    console.log("Verificación (debe ser true):", isMatch);
 }
 
 generateHash();
