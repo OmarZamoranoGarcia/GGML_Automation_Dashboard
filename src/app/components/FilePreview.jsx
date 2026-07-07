@@ -192,16 +192,19 @@ export default function FilePreview({ file, onClose }) {
         )}
 
         {isExcel && !loading && !error && (
-          <div className="h-full min-h-0 overflow-auto rounded-lg border border-slate-200 bg-white">
+          <div className="h-full min-h-0 overflow-auto rounded-lg border border-slate-300 bg-white">
             {rows.length > 0 ? (
-              <table className="min-w-full border-collapse text-sm">
+              <table className="min-w-full border-collapse text-sm text-slate-900">
                 <tbody>
                   {rows.map((row, rowIndex) => (
-                    <tr key={`row-${rowIndex}`} className={rowIndex === 0 ? 'bg-slate-50 font-semibold' : 'odd:bg-white even:bg-slate-50'}>
+                    <tr
+                      key={`row-${rowIndex}`}
+                      className={rowIndex === 0 ? 'bg-slate-100 font-semibold text-slate-900' : 'odd:bg-white even:bg-slate-50'}
+                    >
                       {row.map((cell, cellIndex) => (
                         <td
                           key={`cell-${rowIndex}-${cellIndex}`}
-                          className="whitespace-nowrap border-b border-slate-200 px-3 py-2 align-top"
+                          className="whitespace-nowrap border border-slate-300 px-3 py-2 align-top text-slate-900"
                         >
                           {cell ?? ''}
                         </td>
