@@ -17,7 +17,10 @@ export async function GET(request) {
     );
   }
 
-  const { data, error } = await supabase.from('emails_received').select('*');
+  const { data, error } = await supabase
+  .from('emails_received')
+  .select('*')
+  .order('arrival_at', { ascending: false });
 
   if (error) {
     return Response.json({ ok: false, error: error.message }, { status: 500 });
