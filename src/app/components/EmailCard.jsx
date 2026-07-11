@@ -2,10 +2,15 @@ export default function EmailCard({ email, isSelected, onSelect }) {
     const formatDateTime = (isoDate) => {
         if (!isoDate) return '';
 
-        const date = new Date(isoDate);
+        // Asegurar que la fecha se interprete correctamente y mostrarla en UTC
+        // Algunos strings vienen como "YYYY-MM-DD HH:mm:ss+00" (espacio en vez de 'T'),
+        // convertir el espacio entre fecha y hora a 'T' para cumplimiento ISO.
+        const normalized = isoDate.replace(' ', 'T');
+        const date = new Date(normalized);
 
-        // Formato con AM/PM en español
+        // Formato con AM/PM en español — forzar `timeZone: 'UTC'` para mantener +00
         return date.toLocaleString('es-ES', {
+            timeZone: 'UTC',
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
