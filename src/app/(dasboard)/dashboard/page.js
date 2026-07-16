@@ -7,7 +7,7 @@ import EmailsViewer from '@/app/components/EmailsViewer';
 import EmailFilesModal from '@/app/components/EmailFilesModal';
 
 export default function DashboardLayout() {
-  const [selectedEmailId, setSelectedEmailId] = useState(null);
+  const [selectedEmail, setSelectedEmail] = useState(null);
 
   return (
     <main className="grid h-screen w-screen grid-cols-[14rem_minmax(0,1fr)_minmax(0,1fr)] overflow-hidden">
@@ -17,16 +17,16 @@ export default function DashboardLayout() {
 
       <section className="min-h-0 min-w-0">
         <EmailsViewer
-          selectedEmailId={selectedEmailId}
-          onEmailSelect={setSelectedEmailId}
+          selectedEmailId={selectedEmail?.id}
+          onEmailSelect={setSelectedEmail}
         />
       </section>
 
       <section className="min-h-0 overflow-hidden border-l border-[var(--border-subtle)] bg-[var(--bg-panel)] p-4">
         <EmailFilesModal
-          key={selectedEmailId || 'empty'}
-          emailId={selectedEmailId}
-          onClose={() => setSelectedEmailId(null)}
+          key={selectedEmail?.id || 'empty'}
+          email={selectedEmail}
+          onClose={() => setSelectedEmail(null)}
         />
       </section>
     </main>
