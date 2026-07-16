@@ -28,3 +28,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Scrollbar personalizado delgado */
+.scrollbar-thin-accent::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scrollbar-thin-accent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin-accent::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 10px;
+  opacity: 0.6;
+}
+
+.scrollbar-thin-accent::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
+}
+
+/* Firefox */
+.scrollbar-thin-accent {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+}
