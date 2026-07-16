@@ -68,7 +68,7 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
                 key={email.id}
                 email={email}
                 isSelected={email.id === selectedEmailId}
-                onSelect={onEmailSelect}
+                onSelect={() => onEmailSelect(email)}
               />
             ))}
           </div>
