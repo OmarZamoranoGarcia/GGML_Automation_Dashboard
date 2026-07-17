@@ -72,6 +72,10 @@ export default function EmailFilesModal({ email, onClose }) {
         return "bg-blue-600";
       case "OTHER":
         return "bg-[var(--bg-input)]";
+      case "ERROR":
+        return "bg-red-600";
+      case "COMPLETED":
+        return "bg-green-600";
       default:
         return "bg-[var(--primary)]";
     }
@@ -171,10 +175,7 @@ export default function EmailFilesModal({ email, onClose }) {
             <div>
               <p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Estado</p>
               <div className="mt-1">
-                <span className={`inline-flex rounded-md px-2 py-1 text-xs font-medium ${email.status === 'read' ? 'bg-[var(--bg-input)] text-[var(--text-secondary)]' :
-                  email.status === 'unread' ? 'bg-[var(--accent)] bg-opacity-10 text-[var(--accent)]' :
-                    'bg-[var(--bg-input)] text-[var(--text-secondary)]'
-                  }`}>
+                <span className={`inline-flex rounded-md px-2 py-1 text-xs font-medium ${getBadgeColor(email.status)}`}>
                   {email.status || '-'}
                 </span>
               </div>
