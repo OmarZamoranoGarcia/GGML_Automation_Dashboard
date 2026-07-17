@@ -8,6 +8,7 @@ import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import * as XLSX from 'xlsx';
 
 export default function FilePreview({ file, onClose }) {
@@ -86,6 +87,10 @@ export default function FilePreview({ file, onClose }) {
     window.open(file.public_url, '_blank');
   };
 
+  const handleOpenInNewTab = () => {
+    window.open(file.public_url, '_blank');
+  };
+
   const toggleFullscreen = async () => {
     if (!previewRef.current) return;
 
@@ -142,6 +147,15 @@ export default function FilePreview({ file, onClose }) {
           >
             <DownloadIcon fontSize="small" />
             Descargar
+          </button>
+          <button
+            aria-label="Abrir en pestaña nueva"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-slate-200 text-[var(--secondary)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
+            onClick={handleOpenInNewTab}
+            type="button"
+            title="Abrir en pestaña nueva"
+          >
+            <OpenInNewIcon fontSize="small" />
           </button>
           <button
             aria-label={isFullscreen ? 'Salir de pantalla completa' : 'Ver en pantalla completa'}
