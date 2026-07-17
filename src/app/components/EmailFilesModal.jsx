@@ -27,7 +27,7 @@ export default function EmailFilesModal({ email, onClose }) {
         setError(null);
 
         const response = await apiFetch(`/api/emails/${email.id}`, { cache: 'no-store' });
-      
+
         if (!response.ok) {
           const data = await response.json().catch(() => null);
           throw new Error(data?.error || 'Error al cargar archivos');
@@ -62,6 +62,19 @@ export default function EmailFilesModal({ email, onClose }) {
 
   const handleClosePreview = () => {
     setSelectedFile(null);
+  };
+
+  const getBadgeColor = (role) => {
+    switch (role) {
+      case "ORIGINAL":
+        return "bg-green-600";
+      case "SORT":
+        return "bg-blue-600";
+      case "OTHER":
+        return "bg-[var(--bg-input)]";
+      default:
+        return "bg-[var(--primary)]";
+    }
   };
 
   if (!email) {
@@ -118,7 +131,7 @@ export default function EmailFilesModal({ email, onClose }) {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col gap-4">
       <div className="flex shrink-0 items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-[var(--text-primary)]">Detalles del Email</h2>
         <button
@@ -158,11 +171,10 @@ export default function EmailFilesModal({ email, onClose }) {
             <div>
               <p className="text-xs font-semibold uppercase text-[var(--text-secondary)]">Estado</p>
               <div className="mt-1">
-                <span className={`inline-flex rounded-md px-2 py-1 text-xs font-medium ${
-                  email.status === 'read' ? 'bg-[var(--bg-input)] text-[var(--text-secondary)]' :
+                <span className={`inline-flex rounded-md px-2 py-1 text-xs font-medium ${email.status === 'read' ? 'bg-[var(--bg-input)] text-[var(--text-secondary)]' :
                   email.status === 'unread' ? 'bg-[var(--accent)] bg-opacity-10 text-[var(--accent)]' :
-                  'bg-[var(--bg-input)] text-[var(--text-secondary)]'
-                }`}>
+                    'bg-[var(--bg-input)] text-[var(--text-secondary)]'
+                  }`}>
                   {email.status || '-'}
                 </span>
               </div>
@@ -181,59 +193,62 @@ export default function EmailFilesModal({ email, onClose }) {
         </div>
       )}
 
-      {/* Files Section */}
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className="shrink-0 mb-2">
-          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Archivos adjuntos</h3>
-          <p className="mt-0.5 text-xs text-[var(--text-secondary)]">{files.length} archivos encontrados</p>
-        </div>
-        {files.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-[var(--border-subtle)] bg-[var(--bg-panel)] p-4 text-center">
-            <DescriptionIcon className="mx-auto text-[var(--text-secondary)]" fontSize="small" />
-            <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">No hay archivos adjuntos</p>
+      {/* Files and Preview Grid Section */}
+      <div className="min-h-0 flex-1 gap-6 overflow-y-auto scrollbar-thin-accent">
+        {/* Files Column */}
+        <div className="flex flex-col min-h-0">
+          <div className="shrink-0 mb-2">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">Archivos adjuntos</h3>
+            <p className="mt-0.5 text-xs text-[var(--text-secondary)]">{files.length} archivos encontrados</p>
           </div>
-        ) : (
-          <div className="max-h-full shrink-0 space-y-2 overflow-y-auto pr-1">
-            {files.map((file) => (
-              <button
-                type="button"
-                className={`w-full rounded-lg border p-2.5 text-left transition hover:border-[var(--accent)] hover:shadow-sm ${
-                  selectedFile?.id === file.id
+          {files.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-[var(--border-subtle)] bg-[var(--bg-panel)] p-4 text-center">
+              <DescriptionIcon className="mx-auto text-[var(--text-secondary)]" fontSize="small" />
+              <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">No hay archivos adjuntos</p>
+            </div>
+          ) : (
+            <div className="space-y-2 overflow-y-auto pr-1 min-h-0">
+              {files.map((file) => (
+                <button
+                  type="button"
+                  className={`w-full rounded-lg border p-2.5 text-left transition hover:border-[var(--accent)] hover:shadow-sm shrink-0 ${selectedFile?.id === file.id
                     ? 'border-[var(--accent)] bg-[var(--bg-primary)]'
                     : 'border-[var(--border-subtle)] bg-[var(--bg-panel)]'
-                }`}
-                key={file.id}
-                onClick={() => handleFileClick(file)}
-              >
-                <div className="flex gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--bg-input)] text-[var(--accent)]">
-                    <DescriptionIcon fontSize="small" />
+                    }`}
+                  key={file.id}
+                  onClick={() => handleFileClick(file)}
+                >
+                  <div className="flex gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--bg-input)] text-[var(--accent)]">
+                      <DescriptionIcon fontSize="small" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{file.file_name}</p>
+                      <p className="mt-0.5 truncate text-xs text-[var(--text-secondary)]">
+                        {file.file_type || 'Tipo desconocido'}
+                      </p>
+                      <span className={`mt-1 inline-flex rounded-md ${getBadgeColor(file.file_role)} px-2 py-0.5 text-xs font-medium text-[var(--text-primary)]`}>
+                        {file.file_role || 'Sin rol'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{file.file_name}</p>
-                    <p className="mt-0.5 truncate text-xs text-[var(--text-secondary)]">
-                      {file.file_type || 'Tipo desconocido'}
-                    </p>
-                    <span className="mt-1 inline-flex rounded-md bg-[var(--bg-input)] px-2 py-0.5 text-xs font-medium text-[var(--text-secondary)]">
-                      {file.file_role || 'Sin rol'}
-                    </span>
-                  </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Preview Column */}
+        {selectedFile && (
+          <div className="min-h-0 mt-4">
+            <FilePreview
+              key={selectedFile.id}
+              file={selectedFile}
+              onClose={handleClosePreview}
+            />
           </div>
         )}
       </div>
-
-      {selectedFile && (
-        <div className="min-h-0 flex-1">
-          <FilePreview
-            key={selectedFile.id}
-            file={selectedFile}
-            onClose={handleClosePreview}
-          />
-        </div>
-      )}
     </div>
   );
 }
