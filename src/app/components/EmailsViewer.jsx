@@ -44,7 +44,7 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
   }, []);
 
   return (
-    <section className="flex h-full min-h-0 flex-col bg-[var(--bg-primary)] p-6">
+    <section className="flex h-full min-h-0 flex-col bg-[var(--bg-primary)] p-6 scrollbar-thin-accent">
       <div className="mb-6 flex shrink-0 items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Emails Received</h1>
