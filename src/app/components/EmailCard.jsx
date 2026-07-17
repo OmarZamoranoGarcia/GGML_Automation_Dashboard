@@ -27,11 +27,10 @@ export default function EmailCard({ email, isSelected, onSelect }) {
     return (
         <button
             type="button"
-            className={`w-full h-auto min-h-fit overflow-visible rounded-lg border p-4 text-left transition ${
-                isSelected
+            className={`w-full h-auto min-h-fit overflow-visible rounded-lg border p-4 text-left transition ${isSelected
                     ? 'border-[var(--accent)] bg-[var(--bg-primary)] shadow-sm'
                     : 'border-[var(--border-strong)] bg-[var(--bg-panel)] hover:border-[var(--accent)] hover:shadow-sm'
-            }`}
+                }`}
             onClick={handleClick}
         >
             <div className="text-xs font-medium text-[var(--text-secondary)]">{formatDateTime(email.arrival_at)}</div>
@@ -39,9 +38,16 @@ export default function EmailCard({ email, isSelected, onSelect }) {
                 <h2 className="break-words text-sm font-semibold text-[var(--text-primary)]">{email.arrival_email}</h2>
                 <h3 className="break-words text-sm font-medium text-[var(--text-secondary)]">{email.subject}</h3>
                 <p className="break-words whitespace-pre-wrap text-sm text-[var(--text-secondary)]">{email.body}</p>
-                <span className="inline-flex w-fit rounded-md bg-[var(--bg-input)] px-2 py-1 text-xs font-medium text-[var(--text-secondary)]">
+                {email.status == "COMPLETED" ? (
+                <span className="inline-flex w-fit rounded-md bg-green-600 px-2 py-1 text-xs font-medium text-[var(--text-primary)]">
                     {email.status}
                 </span>
+                ) : (
+                <span className="inline-flex w-fit rounded-md bg-red-500 px-2 py-1 text-xs font-medium text-[var(--text-primary)]">
+                    {email.status}
+                </span>
+                )}
+
             </div>
         </button>
     );
