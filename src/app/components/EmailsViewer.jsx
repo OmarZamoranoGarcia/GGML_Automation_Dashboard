@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import EmailCard from '@/app/components/EmailCard';
 import { apiFetch } from '@/app/(auth)/auth.api';
 
@@ -8,6 +8,7 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
   const [emails, setEmails] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -43,14 +44,32 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
     };
   }, []);
 
+  // estado derivado, memoizado porque puede filtrar sobre listas grandes
+  const filteredEmails = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return emails;
+
+    return emails.filter((email) => {
+      const from = email.arrival_email?.toLowerCase() ?? '';
+      return from.includes(query);
+    });
+  }, [emails, search]);
+
   return (
     <section className="flex h-full min-h-0 flex-col bg-[var(--bg-primary)] p-6 scrollbar-thin-accent">
       <div className="mb-6 flex shrink-0 items-center justify-between gap-4">
-        <div>
+        <div className="w-full">
           <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Emails Received</h1>
           <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {isLoading ? 'Cargando emails...' : `${emails.length} emails encontrados`}
           </p>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar emails por correo..."
+            className="w-full mt-2 p-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-panel)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          />
         </div>
       </div>
 
@@ -63,7 +82,7 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
           <div className="p-6 text-sm text-[var(--text-secondary)]">No hay emails para mostrar.</div>
         ) : (
           <div className="flex flex-col gap-4 p-6">
-            {emails.map((email) => (
+            {filteredEmails.map((email) => (
               <EmailCard
                 key={email.id}
                 email={email}
