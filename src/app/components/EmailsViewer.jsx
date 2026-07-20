@@ -70,7 +70,7 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
     setErrorApi(null);
 
     try {
-      const response = await fetch(`{apiURL}/api/Email/check`);
+      const response = await fetch(`${apiURL}/api/Email/check`);
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}`);
