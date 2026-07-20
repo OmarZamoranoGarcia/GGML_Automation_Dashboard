@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import EmailCard from '@/app/components/EmailCard';
+import ApiModal from '@/app/components/ApiModal';
 import { apiFetch } from '@/app/(auth)/auth.api';
 
 export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
@@ -9,6 +10,10 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [isLoadingApi, setIsLoadingApi] = useState(false);
+  const [response, setResponse] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [errorApi, setErrorApi] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -55,11 +60,53 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
     });
   }, [emails, search]);
 
+  //para desactivar el boton miestrs se espera la respuesta de la API
+  const handleClick = async () => {
+    if (isLoadingApi) return;
+
+    setIsLoadingApi(true);
+    setErrorApi(null);
+
+    try {
+      const response = await fetch('https://ggml-automation.onrender.com/api/Email/check');
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}`);
+      }
+
+      const data = await response.json();
+      setResponse(data);
+      setOpenModal(true);
+
+    } catch (error) {
+      setErrorApi(error.message);
+      setOpenModal(true);
+    } finally {
+      setIsLoadingApi(false);
+    }
+  };
+
   return (
     <section className="flex h-full min-h-0 flex-col bg-[var(--bg-primary)] p-6 scrollbar-thin-accent">
-      <div className="mb-6 flex shrink-0 items-center justify-between gap-4">
+      <div className="mb-6 flex flex-col shrink-0 items-center justify-between gap-4">
+        <div className="grid grid-cols-[1fr_1fr] w-full items-center justify-arrow">
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)] ">Emails Received</h1>
+          <button
+            className="p-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-panel)] text-[var(--text-primary)] focus:outline-none hover:ring-2 hover:ring-[var(--accent)] disabled:opacity-60 disabled:hover:ring-0 disabled:hover:border-[var(--border-subtle)] disabled:hover:bg-[var(--bg-panel)]"
+            onClick={handleClick}
+            disabled={isLoadingApi}
+          >
+            {isLoadingApi ? "Revisando correos ..." : "Revisar correos"}
+          </button>
+
+          <ApiModal
+            isOpen={openModal}
+            onClose={() => setOpenModal(false)}
+            data={response}
+            error={errorApi}
+          />
+        </div>
         <div className="w-full">
-          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Emails Received</h1>
           <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {isLoading ? 'Cargando emails...' : `${emails.length} emails encontrados`}
           </p>
