@@ -68,18 +68,24 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
     setErrorApi(null);
 
     try {
-      const response = await apiFetch("/api/ggml-automation",{ cache: 'no-store' });
+      const response = await apiFetch("/api/ggml-automation", { cache: 'no-store' });
 
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}`);
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        throw new Error(`Respuesta no-JSON del servidor (status ${response.status}).`);
       }
 
-      const data = await response.json();
-      setResponse(data);
+      if (!response.ok || !result.ok) {
+        throw new Error(result?.error || `Error ${response.status}`);
+      }
+
+      setResponse(result.data);
       setOpenModal(true);
 
     } catch (error) {
-      setErrorApi(error.message);
+      setErrorApi(error.message || 'Ocurrió un error desconocido.');
       setOpenModal(true);
     } finally {
       setIsLoadingApi(false);
