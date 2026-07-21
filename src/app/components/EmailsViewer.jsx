@@ -62,15 +62,13 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
 
   //para desactivar el boton miestrs se espera la respuesta de la API
   const handleClick = async () => {
-    const apiURL= process.env.API_URL;
-
     if (isLoadingApi) return;
 
     setIsLoadingApi(true);
     setErrorApi(null);
 
     try {
-      const response = await fetch(`${apiURL}/api/Email/check`);
+      const response = await apiFetch("/api/ggml-automation",{ cache: 'no-store' });
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}`);
