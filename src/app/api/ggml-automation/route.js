@@ -36,8 +36,16 @@ export async function GET(request) {
     }
 
     if (!response.ok) {
+      const errorMessage =
+        data?.error ||
+        data?.message ||
+        (Array.isArray(data?.logs)
+          ? data.logs.find((l) => l.level === 'Error')?.message
+          : null) ||
+        `Error ${response.status} desde el servicio de emails.`;
+
       return Response.json(
-        { ok: false, error: data?.message || `Error ${response.status} desde el servicio de emails.` },
+        { ok: false, error: errorMessage },
         { status: response.status }
       );
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import EmailCard from '@/app/components/EmailCard';
 import ApiModal from '@/app/components/ApiModal';
 import { apiFetch } from '@/app/(auth)/auth.api';
@@ -15,39 +15,27 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
   const [openModal, setOpenModal] = useState(false);
   const [errorApi, setErrorApi] = useState('');
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadEmails = useCallback(async () => {
+  try {
+    const response = await apiFetch('/api/emails', { cache: 'no-store' });
+    const result = await response.json();
 
-    async function loadEmails() {
-      try {
-        const response = await apiFetch('/api/emails', { cache: 'no-store' });
-        const result = await response.json();
-
-        if (!response.ok || !result.ok) {
-          throw new Error(result.error || 'No se pudieron cargar los emails.');
-        }
-
-        if (isMounted) {
-          setEmails(result.data ?? []);
-          setError('');
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err.message || 'No se pudieron cargar los emails.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || 'No se pudieron cargar los emails.');
     }
 
-    loadEmails();
+    setEmails(result.data ?? []);
+    setError('');
+  } catch (err) {
+    setError(err.message || 'No se pudieron cargar los emails.');
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+useEffect(() => {
+  loadEmails();
+}, [loadEmails]);
 
   // estado derivado, memoizado porque puede filtrar sobre listas grandes
   const filteredEmails = useMemo(() => {
@@ -89,6 +77,7 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
       setOpenModal(true);
     } finally {
       setIsLoadingApi(false);
+      loadEmails();
     }
   };
 
