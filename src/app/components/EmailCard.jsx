@@ -9,8 +9,8 @@ export default function EmailCard({ email, isSelected, onSelect }) {
         const date = new Date(normalized);
 
         // Formato con AM/PM en español — forzar `timeZone: 'UTC'` para mantener +00
-        return date.toLocaleString('es-ES', {
-            timeZone: 'UTC',
+        return date.toLocaleString('es-MX', {
+            timeZone: 'America/Tijuana',
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
