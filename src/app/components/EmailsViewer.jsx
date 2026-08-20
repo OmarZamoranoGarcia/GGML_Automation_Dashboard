@@ -3,7 +3,8 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import EmailCard from '@/app/components/EmailCard';
 import ApiModal from '@/app/components/ApiModal';
-import { apiFetch } from '@/app/(auth)/auth.api';
+import { getEmails } from "@/app/api/emails";
+import { checkEmails } from "@/app/api/ggml-automation";
 
 export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
   const [emails, setEmails] = useState([]);
@@ -16,26 +17,25 @@ export default function EmailsViewer({ selectedEmailId, onEmailSelect }) {
   const [errorApi, setErrorApi] = useState('');
 
   const loadEmails = useCallback(async () => {
-  try {
-    const response = await apiFetch('/api/emails', { cache: 'no-store' });
-    const result = await response.json();
+    try {
+      const result = await getEmails();
 
-    if (!response.ok || !result.ok) {
-      throw new Error(result.error || 'No se pudieron cargar los emails.');
+      setEmails(result.data ?? []);
+      setError('');
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'No se pudieron cargar los emails.'
+      );
+    } finally {
+      setIsLoading(false);
     }
+  }, []);
 
-    setEmails(result.data ?? []);
-    setError('');
-  } catch (err) {
-    setError(err.message || 'No se pudieron cargar los emails.');
-  } finally {
-    setIsLoading(false);
-  }
-}, []);
-
-useEffect(() => {
-  loadEmails();
-}, [loadEmails]);
+  useEffect(() => {
+    loadEmails();
+  }, [loadEmails]);
 
   // estado derivado, memoizado porque puede filtrar sobre listas grandes
   const filteredEmails = useMemo(() => {
@@ -56,24 +56,18 @@ useEffect(() => {
     setErrorApi(null);
 
     try {
-      const response = await apiFetch("/api/ggml-automation", { cache: 'no-store' });
+      const result = await checkEmails();
 
-      let result;
-      try {
-        result = await response.json();
-      } catch {
-        throw new Error(`Respuesta no-JSON del servidor (status ${response.status}).`);
-      }
+      console.log('CHECK EMAILS:', result);
 
-      if (!response.ok || !result.ok) {
-        throw new Error(result?.error || `Error ${response.status}`);
-      }
-
-      setResponse(result.data);
+      setResponse(result);
       setOpenModal(true);
-
     } catch (error) {
-      setErrorApi(error.message || 'Ocurrió un error desconocido.');
+      setErrorApi(
+        error instanceof Error
+          ? error.message
+          : 'Ocurrió un error desconocido.'
+      );
       setOpenModal(true);
     } finally {
       setIsLoadingApi(false);

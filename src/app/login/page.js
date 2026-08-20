@@ -1,25 +1,29 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { login } from "@/app/(auth)/auth.api";
-import { validateLogin } from "@/app/(auth)/validators/login.validator";
+import { useEffect, useState } from "react";
+import { login } from "@/app/api/auth";
+import { ApiError } from "@/lib/api-client";
+import { useAuth } from "@/hooks/auth/AuthContext";
 
 export default function Login() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const { setSession, isAuthenticated, isLoading } = useAuth();
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validation = validateLogin(formData);
-    if (!validation.success) {
-      setError(validation.message);
+    if (!formData.email || !formData.password) {
+      setError("Por favor completa todos los campos");
       return;
     }
 
@@ -27,22 +31,25 @@ export default function Login() {
     setError("");
 
     try {
-      const data = await login(formData);
-
-      if (data?.ok) {
-        router.replace(data.redirectTo || "/dashboard");
-        router.refresh();
-        return;
-      }
-
-      setError(data?.message || "No se pudo iniciar sesión.");
+      const user = await login(formData.email, formData.password);
+      setSession(user);
+      router.replace("/dashboard");
+      router.refresh();
     } catch (err) {
-      setError(err.message || "No se pudo iniciar sesión.");
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("No se pudo iniciar sesión.");
+      }
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
+
+  if (isLoading || isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-6 bg-[var(--bg-primary)]">
@@ -56,7 +63,10 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-sm border border-[var(--accent)]/30 bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--accent)]" role="alert">
+            <div
+              className="rounded-sm border border-[var(--accent)]/30 bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--accent)]"
+              role="alert"
+            >
               {error}
             </div>
           )}

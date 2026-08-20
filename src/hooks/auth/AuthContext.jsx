@@ -1,73 +1,59 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
-import { apiFetch, logout as logoutRequest } from "@/app/(auth)/auth.api";
+import { createContext, useContext, useEffect, useState } from "react";
+import { getCurrentUser, logout as logoutApi } from "@/app/api/auth";
+import { registerUnauthorizedHandler } from "@/lib/api-client";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
+    registerUnauthorizedHandler(() => {
+      setUser(null);
+    });
 
-    async function loadUser() {
-      try {
-        const response = await apiFetch("/api/auth/me");
-
-        if (!mounted) {
-          return;
-        }
-
-        if (!response.ok) {
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-
-        const data = await response.json();
-        setUser(data.user ?? null);
-      } catch (error) {
-        if (mounted) {
-          setUser(null);
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadUser();
-
-    return () => {
-      mounted = false;
-    };
+    loadSession();
   }, []);
 
-  const logout = useCallback(async () => {
+  const loadSession = async () => {
     try {
-      await logoutRequest();
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+    } catch {
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const setSession = (loggedUser) => {
+    setUser(loggedUser);
+  };
+
+  const logout = async () => {
+    try {
+      await logoutApi();
     } finally {
       setUser(null);
     }
-  }, []);
+  };
 
-  const value = useMemo(
-    () => ({ user, setUser, loading, logout }),
-    [user, loading, logout],
+  return (
+    <AuthContext.Provider
+      value={{ user, isAuthenticated: !!user, isLoading, setSession, logout }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error("useAuth debe usarse dentro de AuthProvider");
   }
-
   return context;
 }
