@@ -6,7 +6,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DescriptionIcon from '@mui/icons-material/Description';
 
 import FilePreview from '@/app/components/FilePreview';
-import { apiFetch } from '@/app/(auth)/auth.api';
+import { getEmailFiles } from "@/app/api/emails";
 
 export default function EmailFilesModal({ email, onClose }) {
   const [files, setFiles] = useState([]);
@@ -26,21 +26,18 @@ export default function EmailFilesModal({ email, onClose }) {
         setLoading(true);
         setError(null);
 
-        const response = await apiFetch(`/api/emails/${email.id}`, { cache: 'no-store' });
-
-        if (!response.ok) {
-          const data = await response.json().catch(() => null);
-          throw new Error(data?.error || 'Error al cargar archivos');
-        }
-
-        const data = await response.json();
+        const files = await getEmailFiles(email.id);
 
         if (isMounted) {
-          setFiles(data.files ?? data.data ?? []);
+          setFiles(files);
         }
       } catch (err) {
         if (isMounted) {
-          setError(err.message);
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Error al cargar archivos'
+          );
         }
       } finally {
         if (isMounted) {

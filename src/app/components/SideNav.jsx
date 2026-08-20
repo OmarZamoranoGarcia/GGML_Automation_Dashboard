@@ -60,7 +60,7 @@ export default function SideNav() {
         disabled={signingOut}
         className="rounded-lg border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-60"
       >
-        {signingOut ? 'Cerrando sesión...' : 'Sign Out'}
+        {signingOut ? 'Cerrando sesión...' : 'Cerrar sesión'}
       </button>
     </nav>
   );
