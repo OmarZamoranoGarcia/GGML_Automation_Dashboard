@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import InboxIcon from '@mui/icons-material/Inbox';
 import { useAuth } from '@/hooks/auth';
+import ManualExcelUpload from './Manualexcelupload';
 
 const links = [
   { name: 'Inbox', active: true }
@@ -54,6 +55,8 @@ export default function SideNav() {
         </ul>
       </div>
 
+      <ManualExcelUpload />
+      
       <button
         type="button"
         onClick={handleSignOut}

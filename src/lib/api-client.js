@@ -43,12 +43,19 @@ function getOrCreateRefreshPromise() {
 
 async function doFetch(path, options) {
   const { headers, skipAuthRetry, ...rest } = options;
-  
+
+  const isFormData = rest.body instanceof FormData;
+
   return fetch(`${API_URL}${path}`, {
     ...rest,
     credentials: "include", // manda cookies (access_token y refresh_token) en cada request
     headers: {
-      "Content-Type": "application/json",
+      // Si el body es FormData (ej. subir un archivo), NO seteamos
+      // Content-Type manualmente: el navegador debe generarlo solo,
+      // incluyendo el "boundary" que separa los campos del multipart.
+      // Si lo forzamos a application/json (o a multipart sin boundary),
+      // el backend no puede parsear el archivo.
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       "X-Client-Platform": "web",
       ...headers,
     },
